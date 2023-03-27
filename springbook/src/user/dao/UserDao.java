@@ -9,27 +9,41 @@ import java.sql.SQLException;
 import user.domain.User;
 
 public abstract class UserDao {
-	public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
-//		Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
-//		return c;
-	public class NUserDao extends UserDao{
-		public Connection getConnection() throws ClassNotFoundException, SQLException{
-			Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
-			return c;
-		}
+//	public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
+	private ConnectionMaker connectionMaker;
+	
+	public UserDao() {
+		connectionMaker = new DConnectionMaker();
 	}
 	
-	public class DUserDao extends UserDao{
-		public Connection getConnection() throws ClassNotFoundException, SQLException{
+//		Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
+//		return c;
+//	public class NUserDao extends UserDao{
+//		public Connection getConnection() throws ClassNotFoundException, SQLException{
+//			Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
+//			return c;
+//		}
+//	}
+//	
+//	public class DUserDao extends UserDao{
+//		public Connection getConnection() throws ClassNotFoundException, SQLException{
+//			Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
+//			return c;			
+//		}
+//	}
+//	
+	public class DConnectionMaker implements ConnectionMaker {
+		public Connection makeConnection() throws ClassNotFoundException, SQLException{
 			Connection c = DriverManager.getConnection("jdbc:mysql://localhost/lotto_test", "ryu", "1234");
-			return c;			
+			return c;
 		}
 	}
 	
 	public void add(User user ) throws ClassNotFoundException, SQLException{
 //		Class.forName("com.mysql.jdbc.Driver");
 		//더이상 사용되지 않는 드라이버, SPI를 통해 자동으로 등록됨
-		Connection c = getConnection();
+//		Connection c = getConnection();
+		Connection c = connectionMaker.makeConnection();
 		
 		PreparedStatement ps = c.prepareStatement("insert into users(id,name,password) values(?,?,?)");
 		ps.setString(1, user.getId());
@@ -44,7 +58,8 @@ public abstract class UserDao {
 	
 	public User get(String id) throws ClassNotFoundException, SQLException {
 //		Class.forName("com.mysql.jdbc.Driver");
-		Connection c = getConnection();
+//		Connection c = getConnection();
+		Connection c = connectionMaker.makeConnection();
 		
 		PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
 		ps.setString(1, id);
